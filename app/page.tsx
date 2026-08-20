@@ -13,6 +13,9 @@ type Campaign = {
   location: string;
   image: string;
   accent: string;
+  description: string;
+  impact: string;
+  update: string;
 };
 
 type UserRole = "doador" | "instituicao";
@@ -37,6 +40,9 @@ const campaigns: Campaign[] = [
     location: "São Paulo, SP",
     image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=900&q=85",
     accent: "#e8f2dc",
+    description: "O Instituto Sementes do Amanhã acolhe crianças em situação de vulnerabilidade com alimentação, reforço escolar e atividades culturais.",
+    impact: "Com esta campanha, vamos garantir seis meses de atividades para 40 crianças.",
+    update: "A primeira turma já começou as oficinas de leitura e música.",
   },
   {
     id: 2,
@@ -49,6 +55,9 @@ const campaigns: Campaign[] = [
     location: "Juazeiro, BA",
     image: "https://images.unsplash.com/photo-1541544181051-e46607a2d1a2?auto=format&fit=crop&w=900&q=85",
     accent: "#dcebef",
+    description: "Estamos levando cisternas e filtros para famílias que enfrentam longos períodos sem acesso à água potável no sertão.",
+    impact: "A meta instala 12 cisternas e beneficia diretamente 60 famílias.",
+    update: "Duas comunidades já receberam a visita técnica para instalação.",
   },
   {
     id: 3,
@@ -61,6 +70,9 @@ const campaigns: Campaign[] = [
     location: "Curitiba, PR",
     image: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=900&q=85",
     accent: "#f6e8d5",
+    description: "A Casa Pata Feliz resgata animais abandonados, oferece tratamento veterinário e encontra lares responsáveis para eles.",
+    impact: "A arrecadação mantém o tratamento de 25 animais resgatados este mês.",
+    update: "A Mel e o Tobias estão recuperados e prontos para adoção.",
   },
 ];
 
@@ -78,6 +90,7 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState("Todas");
   const [query, setQuery] = useState("");
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+  const [detailCampaign, setDetailCampaign] = useState<Campaign | null>(null);
   const [donationAmount, setDonationAmount] = useState(50);
   const [donated, setDonated] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
@@ -103,6 +116,10 @@ export default function Home() {
     }
     setSelectedCampaign(campaign);
     setDonated(false);
+  }
+
+  function openDetails(campaign: Campaign) {
+    setDetailCampaign(campaign);
   }
 
   function openAuth(mode: AuthMode, role: UserRole) {
@@ -161,7 +178,7 @@ export default function Home() {
               const percentage = Math.round((campaign.raised / campaign.goal) * 100);
               return <article className="campaign-card" key={campaign.id} style={{ "--card-accent": campaign.accent } as React.CSSProperties}>
                 <div className="campaign-image" style={{ backgroundImage: `url(${campaign.image})` }}><span className="campaign-category">{campaign.category}</span></div>
-                <div className="campaign-content"><p className="institution">{campaign.institution} <span>✓</span></p><h3>{campaign.title}</h3><p className="location">⌖ {campaign.location}</p><div className="progress-track"><div style={{ width: `${percentage}%` }} /></div><div className="campaign-stats"><span><strong>{formatCurrency(campaign.raised)}</strong> de {formatCurrency(campaign.goal)}</span><strong>{percentage}%</strong></div><div className="supporters">◉ {campaign.supporters} pessoas já apoiaram <button type="button" onClick={() => openDonation(campaign)}>Doar agora <span>→</span></button></div></div>
+                <div className="campaign-content"><p className="institution">{campaign.institution} <span>✓</span></p><h3>{campaign.title}</h3><p className="location">⌖ {campaign.location}</p><div className="progress-track"><div style={{ width: `${percentage}%` }} /></div><div className="campaign-stats"><span><strong>{formatCurrency(campaign.raised)}</strong> de {formatCurrency(campaign.goal)}</span><strong>{percentage}%</strong></div><div className="supporters">◉ {campaign.supporters} pessoas já apoiaram <span className="card-actions"><button type="button" onClick={() => openDetails(campaign)}>Ver detalhes</button><button type="button" onClick={() => openDonation(campaign)}>Doar agora <span>→</span></button></span></div></div>
               </article>;
             })}
           </div>
@@ -171,6 +188,7 @@ export default function Home() {
         <section className="trust-section" id="como-funciona"><p className="eyebrow">Feito para você confiar</p><h2>Seu dinheiro com propósito,<br /><em>sem complicação.</em></h2><div className="trust-grid"><div><span className="trust-number">01</span><h3>Instituições verificadas</h3><p>Analisamos cada organização antes de ela chegar até você.</p></div><div><span className="trust-number">02</span><h3>Transparência sempre</h3><p>Acompanhe o destino da sua doação e o avanço de cada meta.</p></div><div><span className="trust-number">03</span><h3>Impacto que permanece</h3><p>Conectamos pessoas a projetos que mudam histórias de verdade.</p></div></div></section>
       </main>
 
+      {detailCampaign && <div className="modal-backdrop" role="presentation" onClick={() => setDetailCampaign(null)}><div className="detail-modal" role="dialog" aria-modal="true" aria-labelledby="detail-title" onClick={(event) => event.stopPropagation()}><button className="close-button" type="button" aria-label="Fechar detalhes" onClick={() => setDetailCampaign(null)}>×</button><div className="detail-image" style={{ backgroundImage: `url(${detailCampaign.image})` }}><span className="campaign-category">{detailCampaign.category}</span></div><div className="detail-body"><p className="institution">{detailCampaign.institution} <span>✓</span></p><h2 id="detail-title">{detailCampaign.title}</h2><p className="detail-location">⌖ {detailCampaign.location}</p><p className="detail-description">{detailCampaign.description}</p><div className="detail-impact"><strong>O impacto</strong><p>{detailCampaign.impact}</p></div><div className="detail-update"><span>Última atualização</span><p>{detailCampaign.update}</p></div><div className="detail-footer"><div><strong>{formatCurrency(detailCampaign.raised)}</strong><span> de {formatCurrency(detailCampaign.goal)} · {detailCampaign.supporters} apoiadores</span></div><button className="primary-button" type="button" onClick={() => { setDetailCampaign(null); openDonation(detailCampaign); }}>Apoiar esta causa <span>→</span></button></div></div></div></div>}
       {selectedCampaign && <div className="modal-backdrop" role="presentation" onClick={() => setSelectedCampaign(null)}><div className="donation-modal" role="dialog" aria-modal="true" aria-labelledby="donation-title" onClick={(event) => event.stopPropagation()}><button className="close-button" type="button" aria-label="Fechar" onClick={() => setSelectedCampaign(null)}>×</button>{donated ? <div className="success-state"><span>✓</span><h2>Obrigado por fazer parte.</h2><p>Sua doação de {formatCurrency(donationAmount)} para {selectedCampaign.institution} foi registrada.</p><button className="primary-button" type="button" onClick={() => setSelectedCampaign(null)}>Voltar às campanhas</button></div> : <><p className="eyebrow">Você está apoiando</p><h2 id="donation-title">{selectedCampaign.title}</h2><p className="modal-institution">{selectedCampaign.institution}</p><div className="amount-options">{[25, 50, 100, 250].map((amount) => <button className={donationAmount === amount ? "amount active" : "amount"} type="button" key={amount} onClick={() => setDonationAmount(amount)}>{formatCurrency(amount)}</button>)}</div><label className="custom-amount">Outro valor<input type="number" min="1" value={donationAmount} onChange={(event) => setDonationAmount(Number(event.target.value))} /></label><button className="primary-button full-button" type="button" onClick={() => setDonated(true)}>Continuar com {formatCurrency(donationAmount)} <span>→</span></button></>}</div></div>}
       {authOpen && <div className="modal-backdrop" role="presentation" onClick={() => setAuthOpen(false)}><div className="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title" onClick={(event) => event.stopPropagation()}><button className="close-button" type="button" aria-label="Fechar" onClick={() => setAuthOpen(false)}>×</button><p className="eyebrow">Comunidade DoaBem</p><h2 id="auth-title">{authMode === "login" ? "Que bom ter você de volta." : "Vamos fazer o bem juntos."}</h2><div className="auth-tabs"><button type="button" className={authMode === "login" ? "auth-tab active" : "auth-tab"} onClick={() => setAuthMode("login")}>Entrar</button><button type="button" className={authMode === "register" ? "auth-tab active" : "auth-tab"} onClick={() => setAuthMode("register")}>Criar conta</button></div><div className="role-switch" role="group" aria-label="Tipo de conta"><button type="button" className={authRole === "doador" ? "role-option active" : "role-option"} onClick={() => setAuthRole("doador")}>Sou doador</button><button type="button" className={authRole === "instituicao" ? "role-option active" : "role-option"} onClick={() => setAuthRole("instituicao")}>Sou instituição</button></div><form className="auth-form" onSubmit={handleAuthSubmit}>{authMode === "register" && <label>Nome completo<input required value={authForm.name} onChange={(event) => setAuthForm({ ...authForm, name: event.target.value })} placeholder={authRole === "instituicao" ? "Nome da instituição" : "Seu nome"} /></label>}<label>E-mail<input required type="email" value={authForm.email} onChange={(event) => setAuthForm({ ...authForm, email: event.target.value })} placeholder="voce@email.com" /></label>{authMode === "register" && authRole === "instituicao" && <label>CNPJ<input required value={authForm.document} onChange={(event) => setAuthForm({ ...authForm, document: event.target.value })} placeholder="00.000.000/0000-00" /></label>}<label>Senha<input required type="password" minLength={6} value={authForm.password} onChange={(event) => setAuthForm({ ...authForm, password: event.target.value })} placeholder="Mínimo de 6 caracteres" /></label><button className="primary-button full-button" type="submit">{authMode === "login" ? "Entrar na minha conta" : "Criar minha conta"}<span>→</span></button></form><p className="auth-helper">{authRole === "instituicao" ? "Instituições podem criar campanhas e acompanhar seu impacto." : "Doadores acompanham suas contribuições e apoiam novas causas."}</p></div></div>}
     </div>
