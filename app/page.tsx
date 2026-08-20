@@ -15,6 +15,16 @@ type Campaign = {
   accent: string;
 };
 
+type UserRole = "doador" | "instituicao";
+type AuthMode = "login" | "register";
+
+type AuthForm = {
+  name: string;
+  email: string;
+  password: string;
+  document: string;
+};
+
 const campaigns: Campaign[] = [
   {
     id: 1,
@@ -70,6 +80,11 @@ export default function Home() {
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [donationAmount, setDonationAmount] = useState(50);
   const [donated, setDonated] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<AuthMode>("login");
+  const [authRole, setAuthRole] = useState<UserRole>("doador");
+  const [currentUser, setCurrentUser] = useState<{ name: string; role: UserRole } | null>(null);
+  const [authForm, setAuthForm] = useState<AuthForm>({ name: "", email: "", password: "", document: "" });
 
   const filteredCampaigns = useMemo(() => campaigns.filter((campaign) => {
     const matchesCategory = activeCategory === "Todas" || campaign.category === activeCategory;
@@ -80,8 +95,30 @@ export default function Home() {
   }), [activeCategory, query]);
 
   function openDonation(campaign: Campaign) {
+    if (!currentUser) {
+      setAuthMode("login");
+      setAuthRole("doador");
+      setAuthOpen(true);
+      return;
+    }
     setSelectedCampaign(campaign);
     setDonated(false);
+  }
+
+  function openAuth(mode: AuthMode, role: UserRole) {
+    setAuthMode(mode);
+    setAuthRole(role);
+    setAuthOpen(true);
+  }
+
+  function handleAuthSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setCurrentUser({
+      name: authForm.name || authForm.email.split("@")[0] || "Pessoa", 
+      role: authRole,
+    });
+    setAuthOpen(false);
+    setAuthForm({ name: "", email: "", password: "", document: "" });
   }
 
   return (
@@ -92,7 +129,7 @@ export default function Home() {
           <a href="#campanhas">Explorar campanhas</a>
           <a href="#como-funciona">Como funciona</a>
         </nav>
-        <button className="outline-button" type="button">Entrar</button>
+        {currentUser ? <button className="account-button" type="button" onClick={() => setCurrentUser(null)}><span>{currentUser.name.charAt(0).toUpperCase()}</span>Sair</button> : <button className="outline-button" type="button" onClick={() => openAuth("login", "doador")}>Entrar</button>}
       </header>
 
       <main id="inicio">
@@ -103,7 +140,7 @@ export default function Home() {
             <p className="hero-description">Encontre uma causa que importa para você e ajude instituições sérias a transformar realidades.</p>
             <div className="hero-actions">
               <a className="primary-button" href="#campanhas">Encontrar uma causa <span>↗</span></a>
-              <a className="text-link" href="#como-funciona">Quero criar uma campanha</a>
+              <button className="text-link" type="button" onClick={() => openAuth("register", "instituicao")}>Quero criar uma campanha</button>
             </div>
           </div>
           <div className="hero-art" aria-label="Pessoas ajudando em uma horta comunitária">
@@ -135,6 +172,7 @@ export default function Home() {
       </main>
 
       {selectedCampaign && <div className="modal-backdrop" role="presentation" onClick={() => setSelectedCampaign(null)}><div className="donation-modal" role="dialog" aria-modal="true" aria-labelledby="donation-title" onClick={(event) => event.stopPropagation()}><button className="close-button" type="button" aria-label="Fechar" onClick={() => setSelectedCampaign(null)}>×</button>{donated ? <div className="success-state"><span>✓</span><h2>Obrigado por fazer parte.</h2><p>Sua doação de {formatCurrency(donationAmount)} para {selectedCampaign.institution} foi registrada.</p><button className="primary-button" type="button" onClick={() => setSelectedCampaign(null)}>Voltar às campanhas</button></div> : <><p className="eyebrow">Você está apoiando</p><h2 id="donation-title">{selectedCampaign.title}</h2><p className="modal-institution">{selectedCampaign.institution}</p><div className="amount-options">{[25, 50, 100, 250].map((amount) => <button className={donationAmount === amount ? "amount active" : "amount"} type="button" key={amount} onClick={() => setDonationAmount(amount)}>{formatCurrency(amount)}</button>)}</div><label className="custom-amount">Outro valor<input type="number" min="1" value={donationAmount} onChange={(event) => setDonationAmount(Number(event.target.value))} /></label><button className="primary-button full-button" type="button" onClick={() => setDonated(true)}>Continuar com {formatCurrency(donationAmount)} <span>→</span></button></>}</div></div>}
+      {authOpen && <div className="modal-backdrop" role="presentation" onClick={() => setAuthOpen(false)}><div className="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title" onClick={(event) => event.stopPropagation()}><button className="close-button" type="button" aria-label="Fechar" onClick={() => setAuthOpen(false)}>×</button><p className="eyebrow">Comunidade DoaBem</p><h2 id="auth-title">{authMode === "login" ? "Que bom ter você de volta." : "Vamos fazer o bem juntos."}</h2><div className="auth-tabs"><button type="button" className={authMode === "login" ? "auth-tab active" : "auth-tab"} onClick={() => setAuthMode("login")}>Entrar</button><button type="button" className={authMode === "register" ? "auth-tab active" : "auth-tab"} onClick={() => setAuthMode("register")}>Criar conta</button></div><div className="role-switch" role="group" aria-label="Tipo de conta"><button type="button" className={authRole === "doador" ? "role-option active" : "role-option"} onClick={() => setAuthRole("doador")}>Sou doador</button><button type="button" className={authRole === "instituicao" ? "role-option active" : "role-option"} onClick={() => setAuthRole("instituicao")}>Sou instituição</button></div><form className="auth-form" onSubmit={handleAuthSubmit}>{authMode === "register" && <label>Nome completo<input required value={authForm.name} onChange={(event) => setAuthForm({ ...authForm, name: event.target.value })} placeholder={authRole === "instituicao" ? "Nome da instituição" : "Seu nome"} /></label>}<label>E-mail<input required type="email" value={authForm.email} onChange={(event) => setAuthForm({ ...authForm, email: event.target.value })} placeholder="voce@email.com" /></label>{authMode === "register" && authRole === "instituicao" && <label>CNPJ<input required value={authForm.document} onChange={(event) => setAuthForm({ ...authForm, document: event.target.value })} placeholder="00.000.000/0000-00" /></label>}<label>Senha<input required type="password" minLength={6} value={authForm.password} onChange={(event) => setAuthForm({ ...authForm, password: event.target.value })} placeholder="Mínimo de 6 caracteres" /></label><button className="primary-button full-button" type="submit">{authMode === "login" ? "Entrar na minha conta" : "Criar minha conta"}<span>→</span></button></form><p className="auth-helper">{authRole === "instituicao" ? "Instituições podem criar campanhas e acompanhar seu impacto." : "Doadores acompanham suas contribuições e apoiam novas causas."}</p></div></div>}
     </div>
   );
 }
