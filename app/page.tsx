@@ -13,6 +13,7 @@ type Campaign = {
   location: string;
   image: string;
   accent: string;
+  urgency: "Alta" | "Média" | "Baixa";
   description: string;
   impact: string;
   update: string;
@@ -40,6 +41,7 @@ const campaigns: Campaign[] = [
     location: "São Paulo, SP",
     image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=900&q=85",
     accent: "#e8f2dc",
+    urgency: "Média",
     description: "O Instituto Sementes do Amanhã acolhe crianças em situação de vulnerabilidade com alimentação, reforço escolar e atividades culturais.",
     impact: "Com esta campanha, vamos garantir seis meses de atividades para 40 crianças.",
     update: "A primeira turma já começou as oficinas de leitura e música.",
@@ -55,6 +57,7 @@ const campaigns: Campaign[] = [
     location: "Juazeiro, BA",
     image: "https://images.unsplash.com/photo-1541544181051-e46607a2d1a2?auto=format&fit=crop&w=900&q=85",
     accent: "#dcebef",
+    urgency: "Alta",
     description: "Estamos levando cisternas e filtros para famílias que enfrentam longos períodos sem acesso à água potável no sertão.",
     impact: "A meta instala 12 cisternas e beneficia diretamente 60 famílias.",
     update: "Duas comunidades já receberam a visita técnica para instalação.",
@@ -70,6 +73,7 @@ const campaigns: Campaign[] = [
     location: "Curitiba, PR",
     image: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=900&q=85",
     accent: "#f6e8d5",
+    urgency: "Alta",
     description: "A Casa Pata Feliz resgata animais abandonados, oferece tratamento veterinário e encontra lares responsáveis para eles.",
     impact: "A arrecadação mantém o tratamento de 25 animais resgatados este mês.",
     update: "A Mel e o Tobias estão recuperados e prontos para adoção.",
@@ -77,6 +81,14 @@ const campaigns: Campaign[] = [
 ];
 
 const categories = ["Todas", "Infância", "Emergência", "Animais", "Educação"];
+const cities = ["Todas as cidades", "São Paulo, SP", "Juazeiro, BA", "Curitiba, PR"];
+const urgencies = ["Todas as urgências", "Alta", "Média", "Baixa"];
+const goalRanges = [
+  { label: "Todas as metas", value: "todas" },
+  { label: "Até R$ 20 mil", value: "small" },
+  { label: "R$ 20 mil a R$ 40 mil", value: "medium" },
+  { label: "Acima de R$ 40 mil", value: "large" },
+];
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", {
@@ -88,6 +100,9 @@ function formatCurrency(value: number) {
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState("Todas");
+  const [activeCity, setActiveCity] = useState("Todas as cidades");
+  const [activeUrgency, setActiveUrgency] = useState("Todas as urgências");
+  const [activeGoalRange, setActiveGoalRange] = useState("todas");
   const [query, setQuery] = useState("");
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [detailCampaign, setDetailCampaign] = useState<Campaign | null>(null);
@@ -101,11 +116,25 @@ export default function Home() {
 
   const filteredCampaigns = useMemo(() => campaigns.filter((campaign) => {
     const matchesCategory = activeCategory === "Todas" || campaign.category === activeCategory;
+    const matchesCity = activeCity === "Todas as cidades" || campaign.location === activeCity;
+    const matchesUrgency = activeUrgency === "Todas as urgências" || campaign.urgency === activeUrgency;
+    const matchesGoal = activeGoalRange === "todas"
+      || (activeGoalRange === "small" && campaign.goal <= 20000)
+      || (activeGoalRange === "medium" && campaign.goal > 20000 && campaign.goal <= 40000)
+      || (activeGoalRange === "large" && campaign.goal > 40000);
     const matchesQuery = `${campaign.title} ${campaign.institution} ${campaign.location}`
       .toLowerCase()
       .includes(query.toLowerCase());
-    return matchesCategory && matchesQuery;
-  }), [activeCategory, query]);
+    return matchesCategory && matchesCity && matchesUrgency && matchesGoal && matchesQuery;
+  }), [activeCategory, activeCity, activeGoalRange, activeUrgency, query]);
+
+  const hasActiveFilters = activeCity !== "Todas as cidades" || activeUrgency !== "Todas as urgências" || activeGoalRange !== "todas";
+
+  function clearFilters() {
+    setActiveCity("Todas as cidades");
+    setActiveUrgency("Todas as urgências");
+    setActiveGoalRange("todas");
+  }
 
   function openDonation(campaign: Campaign) {
     if (!currentUser) {
@@ -173,11 +202,17 @@ export default function Home() {
             <div className="search-wrap"><span aria-hidden="true">⌕</span><input aria-label="Buscar campanhas" placeholder="Buscar por causa, instituição ou cidade" value={query} onChange={(event) => setQuery(event.target.value)} /></div>
             <div className="category-list" role="group" aria-label="Filtrar por categoria">{categories.map((category) => <button className={activeCategory === category ? "category active" : "category"} key={category} type="button" onClick={() => setActiveCategory(category)}>{category}</button>)}</div>
           </div>
+          <div className="advanced-filters" aria-label="Filtros avançados">
+            <label className="filter-control"><span>Cidade</span><select value={activeCity} onChange={(event) => setActiveCity(event.target.value)}>{cities.map((city) => <option key={city}>{city}</option>)}</select></label>
+            <label className="filter-control"><span>Urgência</span><select value={activeUrgency} onChange={(event) => setActiveUrgency(event.target.value)}>{urgencies.map((urgency) => <option key={urgency}>{urgency}</option>)}</select></label>
+            <label className="filter-control"><span>Meta da campanha</span><select value={activeGoalRange} onChange={(event) => setActiveGoalRange(event.target.value)}>{goalRanges.map((range) => <option key={range.value} value={range.value}>{range.label}</option>)}</select></label>
+            {hasActiveFilters && <button className="clear-filters" type="button" onClick={clearFilters}>Limpar filtros ×</button>}
+          </div>
           <div className="campaign-grid">
             {filteredCampaigns.map((campaign) => {
               const percentage = Math.round((campaign.raised / campaign.goal) * 100);
               return <article className="campaign-card" key={campaign.id} style={{ "--card-accent": campaign.accent } as React.CSSProperties}>
-                <div className="campaign-image" style={{ backgroundImage: `url(${campaign.image})` }}><span className="campaign-category">{campaign.category}</span></div>
+                <div className="campaign-image" style={{ backgroundImage: `url(${campaign.image})` }}><span className="campaign-category">{campaign.category}</span><span className={`urgency-badge urgency-${campaign.urgency.toLowerCase()}`}>{campaign.urgency === "Alta" ? "Precisa de atenção" : `Urgência ${campaign.urgency.toLowerCase()}`}</span></div>
                 <div className="campaign-content"><p className="institution">{campaign.institution} <span>✓</span></p><h3>{campaign.title}</h3><p className="location">⌖ {campaign.location}</p><div className="progress-track"><div style={{ width: `${percentage}%` }} /></div><div className="campaign-stats"><span><strong>{formatCurrency(campaign.raised)}</strong> de {formatCurrency(campaign.goal)}</span><strong>{percentage}%</strong></div><div className="supporters">◉ {campaign.supporters} pessoas já apoiaram <span className="card-actions"><button type="button" onClick={() => openDetails(campaign)}>Ver detalhes</button><button type="button" onClick={() => openDonation(campaign)}>Doar agora <span>→</span></button></span></div></div>
               </article>;
             })}
