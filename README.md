@@ -2,107 +2,128 @@
 
 > O bem que você faz chega mais longe.
 
-O **DoaBem** é um MVP de uma plataforma de doações para conectar pessoas a instituições e campanhas de impacto social. A experiência foi pensada para tornar a descoberta de causas simples, transparente e acolhedora.
+O **DoaBem** é um MVP de uma plataforma de doações que aproxima pessoas de instituições e campanhas de impacto social. O produto combina descoberta de causas, transparência e uma experiência de apoio simples, acolhedora e responsiva.
 
-## Visão geral
+## Sobre o projeto
 
-A aplicação apresenta campanhas verificadas, permite explorar causas por diferentes critérios e oferece um fluxo de apoio simulado. O projeto funciona atualmente com dados locais em memória, sendo uma base visual e funcional para a evolução até uma plataforma completa.
+O projeto foi criado para validar a experiência principal de uma plataforma de doações antes da integração com backend e meios de pagamento. A versão atual utiliza dados locais e estado do React para demonstrar os fluxos da interface.
 
-## Funcionalidades
+## Experiência disponível
 
-- Página inicial com apresentação da plataforma e impacto da comunidade
-- Catálogo de campanhas com busca, categorias, cidades, urgência e faixa de meta
+### Descoberta de campanhas
+
+- Busca por causa, instituição ou cidade
+- Filtro por categoria, cidade, urgência e faixa de meta
 - Limpeza dos filtros avançados
-- Cards com meta, progresso, apoiadores e urgência da campanha
-- Modal de detalhes com descrição, localização, impacto, atualização e CTA de doação
-- Fluxo de doação demonstrativo com valores sugeridos e valor personalizado
+- Cards com progresso, meta, apoiadores e sinalização de urgência
+
+### Detalhes e doação
+
+- Modal detalhado para cada campanha
+- Descrição da causa, localização e impacto esperado
+- Atualização mais recente da instituição
+- Valores sugeridos e valor personalizado
+- Fluxo de doação demonstrativo com confirmação
+
+### Comunidade
+
 - Cadastro e login demonstrativos para doadores e instituições
-- Ranking de apoiadores com períodos geral e mensal
-- Seção de transparência e confiança
-- Layout responsivo para desktop e dispositivos móveis
+- Ranking de apoiadores desde o início ou referente ao mês atual
+- Selos e informações de contribuição
+- Seção sobre verificação, transparência e impacto
 
-## Stack
+## Tecnologias
 
-- [Next.js](https://nextjs.org/) `16.3.1`
+- [Next.js](https://nextjs.org/) `16.3.1` com App Router
 - [React](https://react.dev/) `19.2.8`
 - [TypeScript](https://www.typescriptlang.org/)
 - [Tailwind CSS](https://tailwindcss.com/) `4`
 - ESLint com `eslint-config-next`
 
-As imagens das campanhas são carregadas do [Unsplash](https://unsplash.com/). Em produção, substitua esses endereços por um serviço de armazenamento otimizado.
+As imagens das campanhas são carregadas do [Unsplash](https://unsplash.com/). Para produção, recomenda-se migrar para um serviço próprio de armazenamento e otimização de imagens.
 
-## Pré-requisitos
+## Requisitos
 
 - Node.js 20 ou superior
 - npm
 
-## Instalação
+## Como executar
+
+Instale as dependências:
 
 ```bash
 npm install
 ```
 
-## Desenvolvimento
+Inicie o ambiente de desenvolvimento:
 
 ```bash
 npm run dev
 ```
 
-Abra [http://localhost:3000](http://localhost:3000) no navegador.
+Depois, acesse [http://localhost:3000](http://localhost:3000).
 
-## Scripts disponíveis
+## Scripts
 
-| Comando | Descrição |
+| Comando | Uso |
 | --- | --- |
 | `npm run dev` | Inicia o servidor de desenvolvimento com Turbopack |
-| `npm run lint` | Executa o ESLint |
+| `npm run lint` | Verifica o código com ESLint |
 | `npm run build` | Gera a build otimizada de produção |
-| `npm run start` | Inicia a aplicação em modo produção |
+| `npm run start` | Executa a build em modo produção |
 
-Validação recomendada antes de abrir um pull request:
+Validação local recomendada:
 
 ```bash
 npm run lint
 npm run build
 ```
 
-## Estrutura principal
+## Estrutura
 
 ```text
 .
 ├── app/
-│   ├── globals.css   # Identidade visual e estilos responsivos
-│   ├── layout.tsx    # Layout raiz e metadados
-│   └── page.tsx      # Página principal e interações do MVP
-├── public/           # Arquivos públicos estáticos
+│   ├── globals.css   # Tokens visuais, componentes e responsividade
+│   ├── layout.tsx    # Layout raiz, idioma e metadados
+│   └── page.tsx      # Página, dados de demonstração e interações
+├── public/           # Recursos estáticos
 ├── next.config.ts    # Configuração do Next.js
 ├── package.json      # Scripts e dependências
 └── tsconfig.json     # Configuração do TypeScript
 ```
 
-## Fluxos para testar
+## Roteiro de demonstração
 
-1. Use a busca e os filtros para encontrar uma campanha.
-2. Clique em **Ver detalhes** para abrir as informações completas.
-3. Clique em **Apoiar esta causa** ou **Doar agora**.
-4. Crie uma conta demonstrativa ou entre com um e-mail qualquer.
-5. Escolha um valor e confirme a doação simulada.
-6. Acesse **Ranking de apoiadores** e alterne entre os períodos.
+1. Acesse **Explorar campanhas**.
+2. Pesquise uma causa ou combine os filtros disponíveis.
+3. Abra **Ver detalhes** em uma campanha.
+4. Selecione **Apoiar esta causa** ou **Doar agora**.
+5. Crie uma conta demonstrativa ou entre com qualquer e-mail válido.
+6. Escolha um valor e confirme a doação simulada.
+7. Abra **Ranking de apoiadores** e alterne entre os períodos.
 
-## Estado atual e próximos passos
+## Estado atual
 
-Este é um MVP frontend. Os dados, autenticação e confirmação de doação são simulados no estado do React e não são persistidos.
+Este repositório contém um MVP frontend. No momento:
 
-Próximas evoluções recomendadas:
+- campanhas e apoiadores são dados demonstrativos;
+- autenticação não é persistida nem validada por um servidor;
+- doações não movimentam dinheiro real;
+- não existe banco de dados ou painel administrativo.
 
-- Persistência de usuários, instituições, campanhas e doações
-- Autenticação real e controle de permissões
-- Integração com Pix e cartão via provedor de pagamentos
+Essas limitações são intencionais para manter o foco na validação da experiência do produto.
+
+## Próximas evoluções
+
+- API e banco de dados para usuários, campanhas e doações
+- Autenticação real com permissões para doadores e instituições
+- Integração segura com Pix e cartão
 - Recibos e notificações por e-mail
-- Painel para instituições criarem campanhas e publicarem atualizações
-- Prestação de contas e histórico verificável das doações
-- Moderação, denúncias e validação documental
-- Testes automatizados de componentes e fluxos críticos
+- Painel de criação e gestão de campanhas
+- Atualizações e prestação de contas das instituições
+- Validação documental, moderação e denúncias
+- Testes automatizados para componentes e fluxos críticos
 
 ## Deploy
 
