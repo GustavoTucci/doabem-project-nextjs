@@ -29,6 +29,15 @@ type AuthForm = {
   document: string;
 };
 
+type Supporter = {
+  name: string;
+  initials: string;
+  amount: number;
+  donations: number;
+  badge: string;
+  color: string;
+};
+
 const campaigns: Campaign[] = [
   {
     id: 1,
@@ -90,6 +99,14 @@ const goalRanges = [
   { label: "Acima de R$ 40 mil", value: "large" },
 ];
 
+const supporters: Supporter[] = [
+  { name: "Marina Oliveira", initials: "MO", amount: 4850, donations: 18, badge: "Coração gigante", color: "#e7c59c" },
+  { name: "Rafael Santos", initials: "RS", amount: 3720, donations: 14, badge: "Mão amiga", color: "#c8dcca" },
+  { name: "Luiza Martins", initials: "LM", amount: 2940, donations: 11, badge: "Presença que transforma", color: "#d9c7d8" },
+  { name: "André Costa", initials: "AC", amount: 2180, donations: 9, badge: "Sempre presente", color: "#c8dbe1" },
+  { name: "Bia Ferreira", initials: "BF", amount: 1860, donations: 8, badge: "Força do coletivo", color: "#efd0b8" },
+];
+
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
@@ -103,6 +120,7 @@ export default function Home() {
   const [activeCity, setActiveCity] = useState("Todas as cidades");
   const [activeUrgency, setActiveUrgency] = useState("Todas as urgências");
   const [activeGoalRange, setActiveGoalRange] = useState("todas");
+  const [rankingPeriod, setRankingPeriod] = useState<"geral" | "mes">("geral");
   const [query, setQuery] = useState("");
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [detailCampaign, setDetailCampaign] = useState<Campaign | null>(null);
@@ -173,6 +191,7 @@ export default function Home() {
         <a className="brand" href="#inicio" aria-label="DoaBem início"><span>+</span> DoaBem</a>
         <nav className="nav-links" aria-label="Navegação principal">
           <a href="#campanhas">Explorar campanhas</a>
+          <a href="#ranking">Ranking de apoiadores</a>
           <a href="#como-funciona">Como funciona</a>
         </nav>
         {currentUser ? <button className="account-button" type="button" onClick={() => setCurrentUser(null)}><span>{currentUser.name.charAt(0).toUpperCase()}</span>Sair</button> : <button className="outline-button" type="button" onClick={() => openAuth("login", "doador")}>Entrar</button>}
@@ -219,6 +238,8 @@ export default function Home() {
           </div>
           {filteredCampaigns.length === 0 && <p className="empty-state">Nenhuma campanha encontrada. Tente outra busca.</p>}
         </section>
+
+        <section className="ranking-section" id="ranking"><div className="ranking-intro"><div><p className="eyebrow">Quem faz acontecer</p><h2>O impacto é maior<br /><em>quando é coletivo.</em></h2></div><p className="section-note">Reconhecemos quem transforma<br />generosidade em movimento.</p></div><div className="ranking-panel"><div className="ranking-panel-head"><div><span className="ranking-kicker">Ranking de apoiadores</span><p>Uma celebração, nunca uma competição.</p></div><div className="ranking-tabs" role="tablist" aria-label="Período do ranking"><button className={rankingPeriod === "geral" ? "ranking-tab active" : "ranking-tab"} type="button" onClick={() => setRankingPeriod("geral")}>Desde o início</button><button className={rankingPeriod === "mes" ? "ranking-tab active" : "ranking-tab"} type="button" onClick={() => setRankingPeriod("mes")}>Este mês</button></div></div><div className="ranking-list">{supporters.map((supporter, index) => <div className={index < 3 ? "supporter-row top-supporter" : "supporter-row"} key={supporter.name}><span className={`ranking-position position-${index + 1}`}>{index + 1}</span><span className="supporter-avatar" style={{ backgroundColor: supporter.color }}>{supporter.initials}</span><span className="supporter-info"><strong>{supporter.name}</strong><small>{supporter.badge} · {supporter.donations} doações</small></span><span className="supporter-amount">{formatCurrency(rankingPeriod === "mes" ? Math.round(supporter.amount * 0.28) : supporter.amount)}</span></div>)}</div><p className="ranking-footnote">Os valores exibidos representam o total doado na plataforma.</p></div></section>
 
         <section className="trust-section" id="como-funciona"><p className="eyebrow">Feito para você confiar</p><h2>Seu dinheiro com propósito,<br /><em>sem complicação.</em></h2><div className="trust-grid"><div><span className="trust-number">01</span><h3>Instituições verificadas</h3><p>Analisamos cada organização antes de ela chegar até você.</p></div><div><span className="trust-number">02</span><h3>Transparência sempre</h3><p>Acompanhe o destino da sua doação e o avanço de cada meta.</p></div><div><span className="trust-number">03</span><h3>Impacto que permanece</h3><p>Conectamos pessoas a projetos que mudam histórias de verdade.</p></div></div></section>
       </main>
